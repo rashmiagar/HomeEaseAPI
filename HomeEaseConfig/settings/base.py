@@ -11,9 +11,9 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
-
+from datetime import timedelta
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 
 # Quick-start development settings - unsuitable for production
@@ -31,6 +31,11 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     'rest_framework',
+    'django_filters',
+    'djoser',
+    # local apps
+    'core.apps.CoreConfig',  # for load signals
+    'properties',
 ]
 
 MIDDLEWARE = [
@@ -62,8 +67,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "HomeEaseConfig.wsgi.application"
-
-
 
 
 # Password validation
@@ -106,3 +109,61 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+AUTH_USER_MODEL = 'core.User'
+
+# rest framework settings
+REST_FRAMEWORK = {
+    'COERCE_DECIMAL_TO_STRING': False,
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10,
+    # auth
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    # documentation
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+# generate docs for api
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Home Ease API',
+    'DESCRIPTION': 'Home Ease API is an open source rest api that provides most functionality will use it as front-end developer to build an awesome application and add it to your portfolio.',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'COMPONENT_SPLIT_REQUEST': True
+    # OTHER SETTINGS
+}
+
+
+SIMPLE_JWT = {
+    'AUTH_HEADER_TYPES': ('JWT',),
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=7),
+}
+# SIMPLE_JWT = {
+#     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
+#     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+#     'AUTH_HEADER_TYPES': ('JWT',),
+#     'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
+#     'USER_ID_FIELD': 'id',
+#     'USER_ID_CLAIM': 'user_id',
+# }
+
+
+DJOSER = {
+    'PASSWORD_RESET_CONFIRM_URL': '#/password/reset/confirm/{uid}/{token}',
+    'USERNAME_RESET_CONFIRM_URL': '#/username/reset/confirm/{uid}/{token}',
+    'ACTIVATION_URL': 'activate/{uid}/{token}',
+    'SEND_ACTIVATION_EMAIL': True,
+
+    'SERIALIZERS': {
+        'user_create': 'core.serializers.CusUserCreateSerializer',
+        'current_user': 'core.serializers.CusUserSerializer',
+    },
+
+    # 'EMAIL': {
+    #     'activation': 'core.email.ActivationEmail'
+    # },
+    'LOGIN_FIELD': 'email',
+}
